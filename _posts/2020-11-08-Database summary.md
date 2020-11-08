@@ -133,7 +133,7 @@ Transaction
 
 ### Example Database
 
-![image-20201108161903848](C:\Users\zhangwenjum\AppData\Roaming\Typora\typora-user-images\image-20201108161903848.png)
+![image-20201108161903848](../images/image-20201108161903848.png)
 
 ### Aggregates
 
@@ -153,11 +153,11 @@ Output of other columns outside of an aggregate is undefined
 
 Project tuples into subsets and calculate aggregates against each subset.
 
-![image-20201108161636721](..\images\image-20201108161636721.png)
+![image-20201108161636721](../images/image-20201108161636721.png)
 
-![image-20201108161648287](..\images\image-20201108161648287.png)
+![image-20201108161648287](../images/image-20201108161648287.png)
 
-![image-20201108161741616](..\images\image-20201108161741616.png)
+![image-20201108161741616](../images/image-20201108161741616.png)
 
 Non-aggregated values in SELECT output clause must appear in GROUP BY clause.
 
@@ -167,7 +167,7 @@ Non-aggregated values in SELECT output clause must appear in GROUP BY clause.
 
 Filter results based on aggregation computation. Like a WHERE clause for a GROUP BY
 
-![image-20201108162207255](..\images\image-20201108162207255.png)
+![image-20201108162207255](../images/image-20201108162207255.png)
 
 上面这个SQL语句是错误的，因为SQL的执行顺序是
 
@@ -175,9 +175,9 @@ $FROM \rightarrow WHERE \rightarrow GROUP \ BY \rightarrow AGGREGATION \rightarr
 
 所以当WHERE clause执行时，并不知道avg_gpa的值。这是就要用到having 语句， 当aggregation根据group by执行完后，使用Having进行filtering 操作。
 
-![image-20201108162512711](..\images\image-20201108162512711.png)
+![image-20201108162512711](../images/image-20201108162512711.png)
 
-![image-20201108162528427](..\images\image-20201108162528427.png)
+![image-20201108162528427](../images/image-20201108162528427.png)
 
 ### String operations
 
@@ -187,21 +187,21 @@ $FROM \rightarrow WHERE \rightarrow GROUP \ BY \rightarrow AGGREGATION \rightarr
 
 '_' Match any one character
 
-![image-20201108163626826](..\images\image-20201108163626826.png)
+![image-20201108163626826](../images/image-20201108163626826.png)
 
-![image-20201108163638836](..\images\image-20201108163638836.png)
+![image-20201108163638836](../images/image-20201108163638836.png)
 
 
 
 '||' : concatenate two or more strings togather
 
-![image-20201108164143229](..\images\image-20201108164143229.png)
+![image-20201108164143229](../images/image-20201108164143229.png)
 
 ### Output Redirection
 
 Store query results in another table, table will have the same number of columns with the same types as the input
 
-![image-20201108164337443](..\images\image-20201108164337443.png)
+![image-20201108164337443](../images/image-20201108164337443.png)
 
 ### Output control
 
@@ -233,21 +233,21 @@ IN -> Equivalent to '=ANY()'
 
 EXISTS -> At least one row is returned.
 
-![image-20201108170028743](..\images\image-20201108170028743.png)
+![image-20201108170028743](../images/image-20201108170028743.png)
 
-![image-20201108170137482](..\images\image-20201108170137482.png)
+![image-20201108170137482](../images/image-20201108170137482.png)
 
-![image-20201108170151568](..\images\image-20201108170151568.png)
+![image-20201108170151568](../images/image-20201108170151568.png)
 
-![image-20201108170259747](..\images\image-20201108170259747.png)
+![image-20201108170259747](../images/image-20201108170259747.png)
 
 ### Window functions
 
 Performs a "sliding" calculation across a set of tuples that are related.
 
-![image-20201108170423991](..\images\image-20201108170423991.png)
+![image-20201108170423991](../images/image-20201108170423991.png)
 
-![image-20201108170503168](..\images\image-20201108170503168.png)
+![image-20201108170503168](../images/image-20201108170503168.png)
 
 Aggregation functions:
 
@@ -256,19 +256,19 @@ Special window functions:
 
 -> Rank() -> Order position of the current row
 
-![image-20201108170702665](..\images\image-20201108170702665.png)
+![image-20201108170702665](../images/image-20201108170702665.png)
 
 The **OVER** keyword specifies how to group together tuples when computing the window function.
 
 Use **Partition by** to specify group.
 
-![image-20201108170902472](..\images\image-20201108170902472.png)
+![image-20201108170902472](../images/image-20201108170902472.png)
 
-![image-20201108170913991](..\images\image-20201108170913991.png)
+![image-20201108170913991](../images/image-20201108170913991.png)
 
 You can also include an **ORDER BY** in the window grouping to sort entries in each group
 
-![image-20201108171205955](..\images\image-20201108171205955.png)
+![image-20201108171205955](../images/image-20201108171205955.png)
 
 Group tuples by cid then sort by grade
 
@@ -280,9 +280,9 @@ Provides a way to write auxiliary statements for use in a larger query
 
 Alternative to nested queries and views.
 
-![image-20201108171351321](..\images\image-20201108171351321.png)
+![image-20201108171351321](../images/image-20201108171351321.png)
 
 You can bind output columns to names before the AS keyword
 
-![image-20201108171444749](..\images\image-20201108171444749.png)
+![image-20201108171444749](../images/image-20201108171444749.png)
 
