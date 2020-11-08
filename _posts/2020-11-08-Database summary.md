@@ -477,3 +477,198 @@ Simple queries that read/update a small amount of data that is related to a sing
 ### OLAP: On-Line Analytical Processing
 
 Complex queries that read large portions of the database spanning multiple entities.
+
+## Buffer pool
+
+How the DBMS manages its memory and move data back-and-forth from disk
+
+Spatial Control:
+-> Where to write pages on disk;
+
+-> **The goal is to keep pages that are used together often as physically close together as possible on disk.**
+
+Temporal Control:
+
+-> When to read pages into memory, and when to write them to disk.
+
+-> **The goal is minimize the number of stalls from having to read data from disk.**
+
+### Buffer pool organization
+
+Memory region organized as an array of fixed-size pages.
+
+An array entry is called a frame
+
+When the DBMS requests a page, an exact copy is placed into one of these frames.
+
+![image-20201108213556199](../images/image-20201108213556199.png)
+
+The **page table** keeps track of pages that are currently in memory
+
+Also maintains additional meta-data per page:
+
+-> **Dirty Flag**
+
+-> **Pin/Reference Counter**
+
+![image-20201108213726867](../images/image-20201108213726867.png)
+
+If page3 is fetched by the DBMS, then this page thould be pinned, so it can not be replaced by replacement policy.
+
+![image-20201108213821530](../images/image-20201108213821530.png)
+
+### Lock verse Latches
+
+Locks:
+
+1. Protects the database's logical contents from other transactions
+2. Held for transaction duration
+3. Need to be able to rollback changes
+
+Latches:
+
+1. Protects the critical sections of DBMS's internal data structure from other threads.
+2. Held for operation duration.
+3. Do not need to be able to rollback changes.
+
+### Page table verse Page directory
+
+The page directory is the mapping from the page ids to page location in the database files.
+
+-> All changes must be recorded on disk to allow the DBMS to find on restart.
+
+The page table is the mapping from the page ids to to a copy of the page in buffer pool frames.
+
+-> This is an in-memory data structure that does not need to be store on disk
+
+### Buffer pool optimizations
+
+#### Multiple buffer pools
+
+The DBMS does not always have a single buffer pool for the entire system.
+
+-> Multiple buffer pool instances.
+
+-> Per-database buffer pool
+
+-> Per-page type buffer pool
+
+Helps reduce latch contention and improve locality
+
+#### Pre-fetching
+
+The DBMS can also prefetch pages based on a query plan.
+
+-> Sequential scans
+
+-> Index scans
+
+```mysql
+SELECT * FROM A WHERE val BETWEEN 100 AND 250
+```
+
+![image-20201108214854953](../images/image-20201108214854953.png)
+
+![image-20201108214912333](../images/image-20201108214912333.png)
+
+![image-20201108214930838](../images/image-20201108214930838.png)
+
+So we can prefetch the index-page5 in the same time we fetch the page index-page3.
+
+#### Scan sharing
+
+Queries can reuse data retrieved from storage or operator computations.
+
+Allow multiple queries to attach to a single cursor that scans a tables.
+
+-> Queries do not have to be the same 
+
+-> Can also share intermediate results
+
+If a query starts a scan and if there one already doing this, then the DBMS will attach to the second query's cursor.
+
+-> The DBMS keep track of where the second query joined with the first so that it can finish the scan when it reaches the end of the data structure.
+
+### Buffer pool bypass
+
+The sequential scan operator will not store fetched pages in the buffer pool to avoid overhead.
+
+-> Memory is local to running query.
+
+-> Works well if operator needs to read a large sequence of pages that are contiguous on disk.
+
+### OS page cache
+
+Most disk operations go through the OS API.
+
+Unless you tell it not to, the OS maintains its own filesystem cache.
+
+Most DBMSs use direct I/O (O_DIRECT) to bypass the OS cache.
+
+-> Redundant copies of pages.
+
+-> Different eviction policies.
+
+### Buffer replacement policies
+
+When the DBMS needs to free up a frame to make room for a new page, it must decide which page to evict from the buffer pool.
+
+-> LRU
+
+-> Clock: Approximation of LRU without needing a separate timestamp per page.
+
+​	-> Each page has a reference bit
+
+​	-> When a page is accessed, set to 1
+
+Organize the pages in a circular buffer with a "clock hand"
+
+-> Upon sweeping, check if a page's bit is set to 1
+
+-> If yes, set to 0, if no, then evict
+
+LRU and CLOCK replacement policies are susceptible to sequential flooding. → A query performs a sequential scan that reads every page. → This pollutes the buffer pool with pages that are read once and then never again.
+
+The most recently used page is actually the most unneeded page.
+
+#### BETTER POLICIES: LRU-K
+
+Track the history of the last K references as timestamps and compute the interval between subsequent accesses.
+
+The DBMS then uses this history to estimate the next time that page is going to be accessed.
+
+#### BETTER POLICIES: LOCALIZATION
+
+The DBMS chooses which pages to evict on a per txn/query basis. This minimizes the pollution of the buffer pool from each query. 
+
+→ Keep track of the pages that a query has accessed.
+
+### Dirty pages
+
+Fast: If a page in the buffer pool is not dirty, the DBMS can simple "drop" it.
+
+SLOW: if a page is dirty, then the DBMS must write back to disk to ensure that its changes are persisted.
+
+Trade-off between fast evictions versus dirty writing pages that will not be read again in the future.
+
+The DBMS can periodically walk through the page table and write dirty pages to disk. 
+
+When a dirty page is safely written, the DBMS can either evict the page or just unset the dirty flag. 
+
+Need to be careful that we don’t write dirty pages before their log records have been written…
+
+### Other memory pools
+
+The DBMS needs memory for things other than just tuples and indexes. 
+
+These other memory pools may not always backed by disk. Depends on implementation.
+
+-> Sorting + Join buffers
+
+-> Query Caches
+
+-> Maintenance Buffers
+
+-> Log Buffers
+
+-> Dictionary Caches
