@@ -153,15 +153,15 @@ Output of other columns outside of an aggregate is undefined
 
 Project tuples into subsets and calculate aggregates against each subset.
 
-![image-20201108161636721](C:\Users\zhangwenjum\AppData\Roaming\Typora\typora-user-images\image-20201108161636721.png)
+![image-20201108161636721](..\images\image-20201108161636721.png)
 
-![image-20201108161648287](C:\Users\zhangwenjum\AppData\Roaming\Typora\typora-user-images\image-20201108161648287.png)
+![image-20201108161648287](..\images\image-20201108161648287.png)
 
-![image-20201108161741616](C:\Users\zhangwenjum\AppData\Roaming\Typora\typora-user-images\image-20201108161741616.png)
+![image-20201108161741616](..\images\image-20201108161741616.png)
 
 Non-aggregated values in SELECT output clause must appear in GROUP BY clause.
 
-![image-20201108161835568](C:\Users\zhangwenjum\AppData\Roaming\Typora\typora-user-images\image-20201108161835568.png)
+![image-20201108161835568](..\images\image-20201108161835568.png)
 
 ### Having
 
