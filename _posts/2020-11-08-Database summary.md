@@ -286,3 +286,194 @@ You can bind output columns to names before the AS keyword
 
 ![image-20201108171444749](../images/image-20201108171444749.png)
 
+## Storage
+
+### Access Time
+
+![image-20201108185241648](../images/image-20201108185241648.png)
+
+### 为什么不借助操作系统
+
+One can use memory mapping(mmap) to store the contents of a file into a process' address space.
+
+The OS is responsible for moving data for moving the files' pages in and out of memory.
+
+DBMS (almost) always want to control things itself and can do a better job at it.
+
+-> Flushing dirty pages to disk in the correct order
+
+-> Specialized prefetching
+
+-> Buffer replacement policy
+
+-> Thread/process scheduling
+
+### File storage
+
+The DBMS stores a database as one or more files on disk. The os doesn't know anything about the contents of these files.
+
+#### Storage manager
+
+The storage manager is responsible for maintaining a database's files. Some do their own scheduling for reads and writes to improve spatial and temporal locality of pages.
+
+It organizes the files as a collection of *pages*.
+
+-> Track data read/written to pages.
+
+-> Track the available space
+
+A page is a fixed-size block of data.
+
+-> It can contain tuples, meta-data, indexes, log records..
+
+-> Most systems do not mix page types
+
+-> Some systems require a page to be self-contained.
+
+Each page is given a unique identifier.
+
+-> The DBMS uses an indirection layer to map page ids to physical locations.
+
+Different DBMSs manage pages in files on disk in different ways
+
+-> Heap file organization
+
+-> Sequential/ Sorted File Organization
+
+-> Hashing File Organization
+
+#### DATABASE HEAP
+
+A heap file is an unordered collection of pages .
+
+Need meta-data to keep track of what pages exist and which ones have free space.
+
+Two ways to represent a heap file:
+
+-> LinkedList
+
+-> Page directory
+
+#### Linked list
+
+![image-20201108192652451](../images/image-20201108192652451.png)
+
+Maintain a header page at the begining of the file that stores two pointers:
+
+-> HEAD of the free page list
+
+-> HEAD of the data page list
+
+Each page keeps track of the number of free slots in itselt
+
+#### Page directory
+
+The DBMS maintains special pages that tracks the location of data pages in the database files.
+
+The directory also records the number of free slots per page
+
+The DBMS has to make sure that the directory pages are in sync with data pages.
+
+#### Page Header
+
+Every page contains a header of meta-data about the page's contents.
+
+-> Page size
+
+-> Checksum
+
+-> DBMS Version
+
+-> Transaction Visibility
+
+-> Compression information
+
+### Page Layout
+
+So how to organize the data stored inside of the page?
+
+Two approaches:
+
+1. Tuple-oriented
+2. Log-structured
+
+#### Slotted Pages
+
+![image-20201108193325604](../images/image-20201108193325604.png)
+
+The Slot Array maps "slots" to the tuples' starting position offsets.
+
+The header keeps track of:
+
+1. The number of used slots
+2. The offset of the starting location of the last slot used.
+
+#### Log-structed file organization
+
+Instead of storing tuples in pages, the DBMS only sotres log records.
+
+The system appends log records to the file of how the database was modified.
+
+-> Inserts store the entire tuple
+
+-> Deletes mark the tuple as deleted
+
+-> Updates contain the delta of just the attributes that were modified.
+
+![image-20201108193648261](../images/image-20201108193648261.png)
+
+To read a record, The DBMS scans the log backwards and "recreates" the tuple to find what it needs.
+
+![image-20201108193700044](../images/image-20201108193700044.png)
+
+Build indexes to allow it to jump to locations in the log
+
+![image-20201108193815363](../images/image-20201108193815363.png)
+
+Periodically compact the log
+
+### Tuple Layout
+
+A tuple is essentially a sequence of bytes. It is the job of DBMS to interpret those bytes into attributes types and values.
+
+#### Tuple header
+
+Each tuple is prefixed with a header that contains meta-data about it.
+
+-> Visibility info(Concurrency control)
+
+-> Bit Map for NULL values
+
+#### Record IDs
+
+The DBMS needs a way to keep track of individual tuples. Each tuple is assigned a unique record identifier.
+
+-> Most common: page_id + offset/slot
+
+-> Can also contain file location info
+
+### System catalog
+
+A DBMS stores meta-data about databases in its internal catalogs
+
+-> Tables, Columns, indexes, views
+
+-> Users, Permissions
+
+-> Internal statistics
+
+Accessing table schema: 
+
+```MYSQL
+DESCRIBE student; 
+```
+
+![image-20201108200912887](../images/image-20201108200912887.png)
+
+### OLTP: On-line transaction processing
+
+Simple queries that read/update a small amount of data that is related to a single entity in the database.
+
+### OLAP: On-Line Analytical Processing
+
+Complex queries that read large portions of the database spanning multiple entities.
