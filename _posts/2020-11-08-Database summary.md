@@ -64,7 +64,7 @@ Foreign key: specifies that an attribute from one relation has to map to a tuple
 
 Operators: 
 
-![image-20201108142657629](images/image-20201108142657629.png)
+![image-20201108142657629](../images/image-20201108142657629.png)
 
 Each operator takes one or more relations as inputs and outputs a new relation
 
@@ -110,7 +110,7 @@ Rename, Assignment, Duplicate Elimination, Aggregation, Sorting, Division
 
 Relational algebra defines the high-level steps of how to compute a query
 
-![image-20201108144020613](images/image-20201108144020613.png)
+![image-20201108144020613](../images/image-20201108144020613.png)
 
 
 
