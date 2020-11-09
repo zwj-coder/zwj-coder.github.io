@@ -1270,3 +1270,156 @@ Shape only depends on key space and lengths.
 -> Does not require rebalancing operations.
 
 All operations have O(k) complexity where k is the length of the key.
+
+
+## Index Concurrency 
+
+### L ATCH IMPLEMENTATIONS
+
+Approach #1: Blocking OS Mutex
+
+-> Simple to use
+
+-> Non-scalable (about 25ns per lock/unlock invocation)
+
+-> Example: std::mutex
+
+Approach #2: Test-and-Set Spin Latch (TAS)
+
+-> Very efficient (single instruction to latch/unlatch) 
+
+-> Non-scalable, not cache friendly 
+
+-> Example: std::atomic
+
+Approach #3: Reader-Writer Latch
+
+-> Allows for concurrent readers 
+
+-> Must manage read/write queues to avoid starvation 
+
+-> Can be implemented on top of spinlocks
+
+### HASH TABLE L ATCHING
+
+Easy to support concurrent access due to the limited ways threads access the data structure.
+
+-> All threads move in the same direction and only access a single page/slot at a time. 
+
+-> Deadlocks are not possible.
+
+#### Approach #1: Page Latches
+
+Each page has its own reader-write latch that protects its entire contents
+
+Threads acquire either a read or write latch before they access a page.
+
+#### Approach #2: Slot Latches
+
+Each slot has its own latch
+
+Can use a single mode latch to reduce meta-data and computational overhead.
+
+### B+TREE CONCURRENCY CONTROL
+
+We want to allow multiple threads to read and update a B+Tree at the same time.
+
+We need to protect from two types of problems:
+
+→ Threads trying to modify the contents of a node at the same time.
+
+→ One thread traversing the tree while another thread splits/merges nodes.
+
+![image-20201109150931585](/images/image-20201109150931585.png)
+
+![image-20201109150954823](/images/image-20201109150954823.png)
+
+![image-20201109151008219](/images/image-20201109151008219.png)
+
+![image-20201109151022009](/images/image-20201109151022009.png)
+
+![image-20201109151039941](/images/image-20201109151039941.png)
+
+### L ATCH CRABBING/COUPLING
+
+Protocol to allow multiple threads to access/modify B+Tree at the same time.
+
+Basic Idea:
+
+→ Get latch for parent.
+
+→ Get latch for child
+
+→ Release latch for parent if “safe”.
+
+A safe node is one that will not split or merge when updated.
+
+→ Not full (on insertion)
+
+→ More than half-full (on deletion)
+
+Find: Start at root and go down; repeatedly,
+
+→ Acquire R latch on child
+
+→ Then unlatch parent
+
+Insert/Delete: Start at root and go down
+
+obtaining W latches as needed. Once child is latched, check if it is safe:
+
+→ If child is safe, release all latches on ancestors.
+
+![image-20201109151241125](/images/image-20201109151241125.png)
+
+![image-20201109151252298](/images/image-20201109151252298.png)
+
+![image-20201109151306328](/images/image-20201109151306328.png)
+
+![image-20201109151323289](/images/image-20201109151323289.png)
+
+![image-20201109151334621](/images/image-20201109151334621.png)
+
+![image-20201109151346072](/images/image-20201109151346072.png)
+
+![image-20201109151357950](/images/image-20201109151357950.png)
+
+What was the first step that all the update examples did on the B+Tree? 
+
+Taking a write latch on the root every time becomes a bottleneck with higher concurrency. 
+
+Can we do better?
+
+Assume that the leaf node is safe. 
+
+Use read latches and crabbing to reach it, and then verify that it is safe. 
+
+If leaf is not safe, then do previous algorithm using write latches.
+
+### BET TER L ATCHING ALGORITHM
+
+Search: Same as before.
+
+Insert/Delete: 
+
+→ Set latches as if for search, get to leaf, and set W latch on leaf.
+
+→ If leaf is not safe, release all latches, and restart thread using previous insert/delete protocol with write latches.
+
+This approach optimistically assumes that only leaf node will be modified; if not, R latches set on the first pass to leaf are wasteful.
+
+The threads in all the examples so far have acquired latches in a "top-down" manner.
+
+→ A thread can only acquire a latch from a node that is below its current node.
+
+→ If the desired latch is unavailable, the thread must wait until it becomes available.
+
+But what if we want to move from one leaf node to another leaf node?
+
+### LEAF NODE SCANS
+
+Latches do not support deadlock detection or avoidance. The only way we can deal with this problem is through coding discipline.
+
+The leaf node sibling latch acquisition protocol must support a "no-wait" mode.
+
+The DBMS's data structures must cope with failed latch acquisitions
