@@ -193,7 +193,7 @@ $FROM \rightarrow WHERE \rightarrow GROUP \ BY \rightarrow AGGREGATION \rightarr
 
 
 
-'||' : concatenate two or more strings togather
+|| : concatenate two or more strings togather
 
 ![image-20201108164143229](/images/image-20201108164143229.png)
 
