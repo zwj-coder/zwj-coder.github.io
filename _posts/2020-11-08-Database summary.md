@@ -110,7 +110,7 @@ Rename, Assignment, Duplicate Elimination, Aggregation, Sorting, Division
 
 Relational algebra defines the high-level steps of how to compute a query
 
-![image-20201108144020613](../images/image-20201108144020613.png)
+![image-20201108144020613](/images/image-20201108144020613.png)
 
 
 
@@ -133,7 +133,7 @@ Transaction
 
 ### Example Database
 
-![image-20201108161903848](../images/image-20201108161903848.png)
+![image-20201108161903848](/images/image-20201108161903848.png)
 
 ### Aggregates
 
@@ -153,21 +153,21 @@ Output of other columns outside of an aggregate is undefined
 
 Project tuples into subsets and calculate aggregates against each subset.
 
-![image-20201108161636721](../images/image-20201108161636721.png)
+![image-20201108161636721](/images/image-20201108161636721.png)
 
-![image-20201108161648287](../images/image-20201108161648287.png)
+![image-20201108161648287](/images/image-20201108161648287.png)
 
-![image-20201108161741616](../images/image-20201108161741616.png)
+![image-20201108161741616](/images/image-20201108161741616.png)
 
 Non-aggregated values in SELECT output clause must appear in GROUP BY clause.
 
-![image-20201108161835568](..\images\image-20201108161835568.png)
+![image-20201108161835568](/images/image-20201108161835568.png)
 
 ### Having
 
 Filter results based on aggregation computation. Like a WHERE clause for a GROUP BY
 
-![image-20201108162207255](../images/image-20201108162207255.png)
+![image-20201108162207255](/images/image-20201108162207255.png)
 
 上面这个SQL语句是错误的，因为SQL的执行顺序是
 
@@ -175,9 +175,9 @@ $FROM \rightarrow WHERE \rightarrow GROUP \ BY \rightarrow AGGREGATION \rightarr
 
 所以当WHERE clause执行时，并不知道avg_gpa的值。这是就要用到having 语句， 当aggregation根据group by执行完后，使用Having进行filtering 操作。
 
-![image-20201108162512711](../images/image-20201108162512711.png)
+![image-20201108162512711](/images/image-20201108162512711.png)
 
-![image-20201108162528427](../images/image-20201108162528427.png)
+![image-20201108162528427](/images/image-20201108162528427.png)
 
 ### String operations
 
@@ -187,21 +187,21 @@ $FROM \rightarrow WHERE \rightarrow GROUP \ BY \rightarrow AGGREGATION \rightarr
 
 '_' Match any one character
 
-![image-20201108163626826](../images/image-20201108163626826.png)
+![image-20201108163626826](/images/image-20201108163626826.png)
 
-![image-20201108163638836](../images/image-20201108163638836.png)
+![image-20201108163638836](/images/image-20201108163638836.png)
 
 
 
 '||' : concatenate two or more strings togather
 
-![image-20201108164143229](../images/image-20201108164143229.png)
+![image-20201108164143229](/images/image-20201108164143229.png)
 
 ### Output Redirection
 
 Store query results in another table, table will have the same number of columns with the same types as the input
 
-![image-20201108164337443](../images/image-20201108164337443.png)
+![image-20201108164337443](/images/image-20201108164337443.png)
 
 ### Output control
 
@@ -233,21 +233,21 @@ IN -> Equivalent to '=ANY()'
 
 EXISTS -> At least one row is returned.
 
-![image-20201108170028743](../images/image-20201108170028743.png)
+![image-20201108170028743](/images/image-20201108170028743.png)
 
-![image-20201108170137482](../images/image-20201108170137482.png)
+![image-20201108170137482](/images/image-20201108170137482.png)
 
-![image-20201108170151568](../images/image-20201108170151568.png)
+![image-20201108170151568](/images/image-20201108170151568.png)
 
-![image-20201108170259747](../images/image-20201108170259747.png)
+![image-20201108170259747](/images/image-20201108170259747.png)
 
 ### Window functions
 
 Performs a "sliding" calculation across a set of tuples that are related.
 
-![image-20201108170423991](../images/image-20201108170423991.png)
+![image-20201108170423991](/images/image-20201108170423991.png)
 
-![image-20201108170503168](../images/image-20201108170503168.png)
+![image-20201108170503168](/images/image-20201108170503168.png)
 
 Aggregation functions:
 
@@ -256,19 +256,19 @@ Special window functions:
 
 -> Rank() -> Order position of the current row
 
-![image-20201108170702665](../images/image-20201108170702665.png)
+![image-20201108170702665](/images/image-20201108170702665.png)
 
 The **OVER** keyword specifies how to group together tuples when computing the window function.
 
 Use **Partition by** to specify group.
 
-![image-20201108170902472](../images/image-20201108170902472.png)
+![image-20201108170902472](/images/image-20201108170902472.png)
 
-![image-20201108170913991](../images/image-20201108170913991.png)
+![image-20201108170913991](/images/image-20201108170913991.png)
 
 You can also include an **ORDER BY** in the window grouping to sort entries in each group
 
-![image-20201108171205955](../images/image-20201108171205955.png)
+![image-20201108171205955](/images/image-20201108171205955.png)
 
 Group tuples by cid then sort by grade
 
@@ -280,17 +280,17 @@ Provides a way to write auxiliary statements for use in a larger query
 
 Alternative to nested queries and views.
 
-![image-20201108171351321](../images/image-20201108171351321.png)
+![image-20201108171351321](/images/image-20201108171351321.png)
 
 You can bind output columns to names before the AS keyword
 
-![image-20201108171444749](../images/image-20201108171444749.png)
+![image-20201108171444749](/images/image-20201108171444749.png)
 
 ## Storage
 
 ### Access Time
 
-![image-20201108185241648](../images/image-20201108185241648.png)
+![image-20201108185241648](/images/image-20201108185241648.png)
 
 ### 为什么不借助操作系统
 
@@ -356,7 +356,7 @@ Two ways to represent a heap file:
 
 #### Linked list
 
-![image-20201108192652451](../images/image-20201108192652451.png)
+![image-20201108192652451](/images/image-20201108192652451.png)
 
 Maintain a header page at the begining of the file that stores two pointers:
 
@@ -399,7 +399,7 @@ Two approaches:
 
 #### Slotted Pages
 
-![image-20201108193325604](../images/image-20201108193325604.png)
+![image-20201108193325604](/images/image-20201108193325604.png)
 
 The Slot Array maps "slots" to the tuples' starting position offsets.
 
@@ -420,15 +420,15 @@ The system appends log records to the file of how the database was modified.
 
 -> Updates contain the delta of just the attributes that were modified.
 
-![image-20201108193648261](../images/image-20201108193648261.png)
+![image-20201108193648261](/images/image-20201108193648261.png)
 
 To read a record, The DBMS scans the log backwards and "recreates" the tuple to find what it needs.
 
-![image-20201108193700044](../images/image-20201108193700044.png)
+![image-20201108193700044](/images/image-20201108193700044.png)
 
 Build indexes to allow it to jump to locations in the log
 
-![image-20201108193815363](../images/image-20201108193815363.png)
+![image-20201108193815363](/images/image-20201108193815363.png)
 
 Periodically compact the log
 
@@ -468,7 +468,7 @@ Accessing table schema:
 DESCRIBE student; 
 ```
 
-![image-20201108200912887](../images/image-20201108200912887.png)
+![image-20201108200912887](/images/image-20201108200912887.png)
 
 ### OLTP: On-line transaction processing
 
@@ -501,7 +501,7 @@ An array entry is called a frame
 
 When the DBMS requests a page, an exact copy is placed into one of these frames.
 
-![image-20201108213556199](../images/image-20201108213556199.png)
+![image-20201108213556199](/images/image-20201108213556199.png)
 
 The **page table** keeps track of pages that are currently in memory
 
@@ -511,11 +511,11 @@ Also maintains additional meta-data per page:
 
 -> **Pin/Reference Counter**
 
-![image-20201108213726867](../images/image-20201108213726867.png)
+![image-20201108213726867](/images/image-20201108213726867.png)
 
 If page3 is fetched by the DBMS, then this page thould be pinned, so it can not be replaced by replacement policy.
 
-![image-20201108213821530](../images/image-20201108213821530.png)
+![image-20201108213821530](/images/image-20201108213821530.png)
 
 ### Lock verse Latches
 
@@ -567,11 +567,11 @@ The DBMS can also prefetch pages based on a query plan.
 SELECT * FROM A WHERE val BETWEEN 100 AND 250
 ```
 
-![image-20201108214854953](../images/image-20201108214854953.png)
+![image-20201108214854953](/images/image-20201108214854953.png)
 
-![image-20201108214912333](../images/image-20201108214912333.png)
+![image-20201108214912333](/images/image-20201108214912333.png)
 
-![image-20201108214930838](../images/image-20201108214930838.png)
+![image-20201108214930838](/images/image-20201108214930838.png)
 
 So we can prefetch the index-page5 in the same time we fetch the page index-page3.
 
