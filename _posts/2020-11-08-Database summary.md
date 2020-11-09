@@ -672,3 +672,347 @@ These other memory pools may not always backed by disk. Depends on implementatio
 -> Log Buffers
 
 -> Dictionary Caches
+
+## HASH TABLES
+
+a **hash table** implements an unordered associative array that maps keys to values.
+
+It uses a hash function to compute an offset into the array for a given key, from which the desired value can be found
+
+Space Complexity: $O(n)$
+
+Operation Complexity:
+
+-> Average: $O(1)$  Money cares about constants
+
+-> Worst: $O(n)$
+
+### STATIC HASH TABLE
+
+allocate a giant array that has one slot for every element you need to store.
+
+To find an entry, mod the key by the number of elements to find the offset in the array.
+
+### Assumption
+
+You know the number of elements ahead of time.
+
+Each key is unique.
+
+Prefect hash function: if key1 != key2, then hash(key1) != hash(key2)
+
+### Design Decision
+
+1. Hash function
+
+   -> How to map a large key space into a small domain
+
+   -> Trade-off between being fast vs. collision rate
+
+2. Hashing Schema
+
+   -> How to handle key collisions after hashing
+
+   -> Trade-off between allocating a large hash table vs. additional instructions to find/insert keys.
+
+### HASH FUNCTIONS
+
+For any input key, return an integer representation of that key
+
+we want something that is fast and has a slow collision rate
+
+[CRC-64(1975)](https://create.stephan-brumme.com/crc32/)
+
+-> Used in networking for error detection.
+
+[MurmurHash(2008)](https://github.com/aappleby/smhasher)
+
+-> Designed to a fast, general purpose hash function
+
+[Google CityHash(2011)](https://github.com/google/cityhash)
+
+-> Design to be faster for short keys (<64 bytes).
+
+[FaceBook XXHash(2012)](http://cyan4973.github.io/xxHash/)
+
+-> From the creator of zstd compression.
+
+[Google FarmHash(2014)](https://github.com/google/farmhash)
+
+->Newer version of CityHash with better collision rates
+
+![image-20201109094223095](/images/image-20201109094223095.png)
+
+<img src="/images/image-20201109094245099.png" alt="image-20201109094245099" style="zoom: 50%;" />
+
+## Static Hashing Schemas
+
+### Approach 1: Linear Probe Hashing
+
+Single giant table of slots
+
+Resolve collisions by linearly searching for the next free slot in the table.
+
+​	-> To determine whether an element is present, hash to a location in the index and scan for it.
+
+​	-> Have to store the key in the index to know when to stop scanning
+
+​	-> Insertions and deletions are generalizations of lookups
+
+Delete:
+
+​	-> approach 1: if a element in the hash table is deleted, mark it as "Tombstone".
+
+​	-> approach 2: movement
+
+#### Non-unique keys
+
+choice 1: Separate Linked List
+
+​	-> Store values in separate storage area for each key
+
+![image-20201109095036835](/images/image-20201109095036835.png)
+
+ Choice 2: Redundant keys
+
+​	-> Store duplicate keys entries together in the hash table
+
+![image-20201109095127549](/images/image-20201109095127549.png)
+
+### Robin hood hashing
+
+Variant of linear probe hashing that steals slots from **Rich** keys and give them to **Poor** keys
+
+-> Each key tracks the number of positions they are from where its optimal position in the table.
+
+-> On insert, a key takes the slot of another key if the first key is farther away from its optimal position than the second key.
+
+Example:
+
+![image-20201109095412909](/images/image-20201109095412909.png)
+
+![image-20201109095426183](/images/image-20201109095426183.png)
+
+![image-20201109095440424](/images/image-20201109095440424.png)
+
+![image-20201109095455799](/images/image-20201109095455799.png)
+
+![image-20201109095509196](/images/image-20201109095509196.png)
+
+![image-20201109095527294](/images/image-20201109095527294.png)
+
+![image-20201109095542479](/images/image-20201109095542479.png)
+
+### Cuckoo Hashing
+
+Use multiple hash tables with different hash function seeds.
+
+-> On insert, check every table and pick anyone that has a free slot
+
+-> If no tables has a free slot, evict the element from one of them and then re-hash it find a new location
+
+Look-ups and deletions are always $O(1)$ because only one location per hash is checked.
+
+![image-20201109100915526](/images/image-20201109100915526.png)
+
+![image-20201109100926096](/images/image-20201109100926096.png)
+
+![image-20201109100938116](/images/image-20201109100938116.png)
+
+![image-20201109100949124](/images/image-20201109100949124.png)
+
+![image-20201109100959994](/images/image-20201109100959994.png)
+
+![image-20201109101013209](/images/image-20201109101013209.png)
+
+![image-20201109101024973](/images/image-20201109101024973.png)
+
+![image-20201109101035177](/images/image-20201109101035177.png)
+
+## Obeservation
+
+The previous hash tables require the DBMS to know the number of elements it wants to store.
+
+-> Otherwise it has rebuild the table if it need grow/shrink in size
+
+Dynamic hash tables resize themselves on demand
+
+-> Chained Hashing
+
+-> Extendible Hashing
+
+-> Linear Hashing
+
+### Chained Hashing
+
+Maintain a linked list of **buckets** for each slot in the hash table.
+
+Resolve collisions by placing all elements with the same hash key into the same bucket.
+
+-> To determine whether an element is present, hash to its bucket and scan for it.
+
+-> Insertions and deletions are generalizations of lookups.
+
+![image-20201109102014723](/images/image-20201109102014723.png)
+
+### Extendible Hashing
+
+Chained-hashing approach where we split buckets instead of letting the linked list grow forever.
+
+Multiple slot locations can point to the same bucket chain.
+
+Reshuffling bucket entries on splitand increase the number of bits to examine.
+
+-> Data movement is localized to just the split chain.
+
+![image-20201109102221657](/images/image-20201109102221657.png)
+
+![image-20201109102241555](/images/image-20201109102241555.png)
+
+because the global bit number is 2, we compare the first 2 bits of hash(A) within the bit array
+
+![image-20201109102340112](/images/image-20201109102340112.png)
+
+![image-20201109102354770](/images/image-20201109102354770.png)
+
+这时，(10) slot对应的bucket已经满了，同时这个bucket的local bit number是2， 等于global bit number, 所以global bit number加1
+
+![image-20201109102516065](/images/image-20201109102516065.png)
+
+并重新分配bit array
+
+![image-20201109102529981](/images/image-20201109102529981.png)
+
+![image-20201109102626557](/images/image-20201109102626557.png)
+
+![image-20201109102647339](/images/image-20201109102647339.png)
+
+### Linear Hashing 
+
+The hash table maintains a pointer that tracks the next bucket to split
+
+-> When any bucket overflows, split the bucket at the pointer location
+
+Use multiple hashes to find the rigth bucket for a given key.
+
+![image-20201109102918738](/images/image-20201109102918738.png)
+
+![image-20201109102929735](/images/image-20201109102929735.png)
+
+![image-20201109102944526](/images/image-20201109102944526.png)
+
+![image-20201109103003030](/images/image-20201109103003030.png)
+
+![image-20201109103014455](/images/image-20201109103014455.png)
+
+![image-20201109103030655](/images/image-20201109103030655.png)
+
+![image-20201109103053856](/images/image-20201109103053856.png)
+
+![image-20201109103111196](/images/image-20201109103111196.png)
+
+![image-20201109103122854](/images/image-20201109103122854.png)
+
+![image-20201109103133641](/images/image-20201109103133641.png)
+
+![image-20201109103149184](/images/image-20201109103149184.png)
+
+Splitting buckets based on the split pointer will eventually get to all overflowed buckets.
+
+-> When the pointer reaches the last slot, delete the first hash fuction and move back the beginning.
+
+![image-20201109103332581](/images/image-20201109103332581.png)
+
+![image-20201109103406238](/images/image-20201109103406238.png)
+
+![image-20201109103446689](/images/image-20201109103446689.png)
+
+Question 1: Cuckoo Hashing
+
+Consider the following cuckoo hashing schema:
+
+1. Both tables have a size of 4.
+2. The hashing function of the first table returns the lowest two bits: $h_1(x) = x \& 0b11$
+3. The hashing function of the second table returns the next two bits: $h_2(x) = (x >> 2) \& 0b11$
+4. When replacement is necessary, first select an element in the second table.
+5. The original content is show int Figure 1.
+
+![image-20201109104507739](/images/image-20201109104507739.png)
+
+(a) Insert keys 12 and 10, Draw the resulting two tables.
+
+$h_1(12) = 0$
+
+$h_2(12) = 3$
+
+$h_1(10) = 2$
+
+$h_2(10) = 2$
+
+<img src="/images/image-20201109105036203.png" alt="image-20201109105036203" style="zoom:50%;" />
+
+(b) Then delete 14, and insert 8, draw the resulting two tables.
+
+$h_1(8) = 0$
+
+$h_2(8)=2$
+
+rehash 10
+
+$h_1(10) = 2$
+
+$h_2(10) = 2$
+
+<img src="/images/image-20201109105911121.png" alt="image-20201109105911121" style="zoom:50%;" />
+
+(c) Finally, insert 28, draw the resulting two tables
+
+$h_1(28) = 0$ 
+
+$h_2(28) = 3$
+
+rehasing 12
+
+$h_1(12)=0$
+
+$h_2(12)=3$
+
+rehasing 4
+
+$h_1(4) = 0$
+
+$h_2(4) = 1$
+
+<img src="/images/image-20201109105832826.png" alt="image-20201109105832826" style="zoom:50%;" />
+
+Question 2: Extendible Hashing
+
+Consider an extendible hashing structure such that:
+
+Each bucket can hold up to two records
+
+The hashing function uses the lowest g bits, where g is the globale depth
+
+(a) starting from an empty table, insert keys 15, 3, 7, 14
+
+1. What is the global depth of the resulting table? **3**
+2. What is the local depth the bucket containing 14? **1**
+3. What is the local depth of the bucket containing 3? **3**
+
+(b) Starting from the result in (a), you insert keys 1, 9, 23, 11, 17
+
+ 	1. Which key will first cause a split (without doubling the size of the table)? **17**
+ 	2. Which key will first make the table double in size?  **23**
+
+(c) Now consider the table below, along with the following deletion rules:
+
+ 	1. If two buckets have the same local depth d, and share the first d − 1 bits of their indexes (e.g. 010 and 110 share the first 2 bits), then they can be merged if the total capacity fits in a single bucket. The resulting local depth is d − 1.
+ 	2. If the global depth g becomes strictly greater than all local depths, then the table can be halved in size. The resulting global depth is g − 1
+
+![image-20201109112410944](/images/image-20201109112410944.png)
+
+Starting from the table above, delete keys 2, 7, 13, 15, 29
+
+i. [4 points] Which deletion first causes a reduction in a local depth. **13**
+
+ii. [4 points] Which deletion first causes a reduction in global depth. **13**
