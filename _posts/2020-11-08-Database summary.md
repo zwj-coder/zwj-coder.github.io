@@ -1016,3 +1016,257 @@ Starting from the table above, delete keys 2, 7, 13, 15, 29
 i. [4 points] Which deletion first causes a reduction in a local depth. **13**
 
 ii. [4 points] Which deletion first causes a reduction in global depth. **13**
+
+
+## Tree Index
+
+A table index is a replica of a subset of a table's attributes that are organized and/or sorted for efficient access using a subset of those attributes.
+
+The DBMS ensures that the contents of the table and the index are logically in sync.
+
+It is the DBMS's job to figure out the best index(es) to use to execute each query.
+
+There is a trade-off on the number of indexes to create per database.
+
+-> Storage Overhead
+
+-> Maintenance Overhead
+
+### B+Tree
+
+A B+Tree is self-balancing tree data structure that keeps data sorted and allows searches, sequential access, insertions, and deletions in $O(log(n))$
+
+-> Generalization of a binary search tree in that a node can have more than two children.
+
+-> Optimizd for systems that read and write large blocks of data.
+
+#### B+Tree Nodes
+
+Every B+Tree node is comprised of an array of key/value pairs.
+
+-> The keys are derived from the attributes that the index is based on.
+
+-> The values will differ based on whether the node is classified as inner nodes or leaf nodes.
+
+#### B+Tree Leaf Node
+
+![image-20201109142046307](/images/image-20201109142046307.png)
+
+#### Leaf Node values
+
+Approach 1: Record ids
+
+-> A pointer to the location of the tuple that the index entry corresponds to.
+
+Approach 2: Tuple Data
+
+-> The actual contents of the tuple is stored in the leaf node.
+
+-> Secondary indexes have to store the record id as their values.
+
+### B-Tree VS. B+Tree
+
+The original B-Tree stored keys + values in all nodes in the tree
+
+A B+Tree only stores values in leaf nodes. Inner nodes only guide the search process.
+
+### B+Tree Insert
+
+Find correct leaf node L
+
+Put data entry into L in sorted order
+
+If L has enough space, done!
+
+Otherwise, split L keys into L and a new node L2
+
+-> Redistrubute entries evenly, copy up middle keys.
+
+-> Insert index entry pointing to L2 into parent of L.
+
+To split inner node, redistribute entries evenly,but push up middle key.
+
+### B+Tree Delete
+
+Start at root, find leaf L where entry belongs.
+
+Remove the entry.
+
+If L is at least half-full, done!
+If L has only M/2-1 entries.
+
+-> Try to re-distribute, borrowing from sibling
+
+-> If re-distribution fails, merge L and sibling
+
+If merge occurred, must delete entry(Pointing to L or sibling) from parent of L.
+
+### Clustered indexes
+
+The table is stored in the sort order specified by the primary key.
+
+-> Can be either heap- or index-organized storage.
+
+Some DBMSs always use a clustered index.
+
+-> If a table doesn't contain a primary key, the DBMS will automatically make a hidden row id primary key.
+
+### Selection condition
+
+The DBMS can use a B+Tree index if the query provides any of the attributes of the search key.
+
+Exaple: Index on **<a, b, c>**
+
+-> Supported: (a = 5 And b = 3)
+
+-> Supported: (b = 3)
+
+Not all DBMSs support this.
+
+For hash index, we must have all attributes in search key.
+
+### Merge Threshold
+
+Some DBMSs do not always merge nodes when it is half full.
+
+Delaying a merge operation may reduce the amount of reorganization.
+
+It may also be better to just let underflows to exist and then periodically rebuild entire tree.
+
+### Variable length keys
+
+Approach #1: Pointers
+
+-> Store the keys as pointers to the tuple’s attribute
+
+Approach #2: Variable Length Nodes
+
+->The size of each node in the index can vary. → Requires careful memory management.
+
+Approach #3: Padding 
+
+->Always pad the key to be max length of the key type.
+
+Approach #4: Key Map / Indirection 
+
+->Embed an array of pointers that map to the key + value list within the node.
+
+![image-20201109143657876](/images/image-20201109143657876.png)
+
+![image-20201109143717331](/images/image-20201109143717331.png)
+
+### INTRA-NODE SEARCH
+
+Approach #1: Linear 
+
+-> Scan node keys from beginning to end.
+
+Approach #2: Binary 
+
+-> Jump to middle key, pivot left/right depending on comparison
+
+### Optimization
+
+#### Prefix compression
+
+Sorted keys in the same leaf node are likely to have the same prefix
+
+![image-20201109144044749](/images/image-20201109144044749.png)
+
+Instead of storing the entire key each time, extract common prefix and store only unique suffix for each key.
+
+#### Suffix truncation
+
+The keys in the inner nodes are only used to "direct traffic"
+
+-> We don't need the entire key.
+
+Store a minimum prefix that is needed to correctly route probes into the index.
+
+![image-20201109144411388](/images/image-20201109144411388.png)
+
+![image-20201109144420908](/images/image-20201109144420908.png)
+
+#### Bulk insert
+
+The fastest/best way to build a B+Tree is to first sort the keys and then build the index from the bottom up.
+
+#### POINTER SWIZZLING
+
+Nodes use page ids to reference other nodes in the index. The DBMS must get the memory location from the page table during traversal.
+
+If a page is pinned in the buffer pool, then we can store raw pointers instead of page ids. This avoids address lookups from the page table.
+
+![image-20201109144558198](/images/image-20201109144558198.png)
+
+![image-20201109144611665](/images/image-20201109144611665.png)
+
+### B+Tree: Duplicate keys
+
+Approach 1: Append Record id
+
+-> Add the tuple's unique record id as part of the key to ensure that all keys are unique.
+
+Approach 2: Overflow leaf nodes
+
+-> Allow leaf nodes to spill into overflow nodes that contain the duplicate keys.
+
+-> This is more complex to maintain and modify.
+
+![image-20201109144810770](/images/image-20201109144810770.png)
+
+![image-20201109144944604](/images/image-20201109144944604.png)
+
+![image-20201109144957932](/images/image-20201109144957932.png)
+
+![image-20201109145012094](/images/image-20201109145012094.png)
+
+![image-20201109145025866](/images/image-20201109145025866.png)
+
+### Implicit indexes
+
+Most DBMSs automatically create an index to enforce integrity constraints but not referential constraints (foreign keys).
+
+-> Primary keys
+
+-> Unique Constrains
+
+![image-20201109145153069](/images/image-20201109145153069.png)
+
+### Partial indexes
+
+Create an index on a subset of the entire table. This potentially reduces its size and the amount of overhead to maintain it.
+
+![image-20201109145305171](/images/image-20201109145305171.png)
+
+One common use case is to partition indexes by date ranges. 
+
+-> Create a separate index per month, year
+
+![image-20201109145409882](/images/image-20201109145409882.png)
+
+### Covering indexes
+
+If all the fields needed to process the query are available in an index, then the DBMS does not need to retrieve the tuple
+
+![image-20201109145500432](/images/image-20201109145500432.png)
+
+### Index include columns
+
+Embed additional columns in indexes to support index-only queries.
+
+![image-20201109145610799](/images/image-20201109145610799.png)
+
+### Trie index
+
+Use a digital representation of keys to examine prefixes oneby-one instead of comparing entire key
+
+![image-20201109145754510](/images/image-20201109145754510.png)
+
+Shape only depends on key space and lengths.
+
+-> Does not depend on existing keys or insertion order.
+
+-> Does not require rebalancing operations.
+
+All operations have O(k) complexity where k is the length of the key.
