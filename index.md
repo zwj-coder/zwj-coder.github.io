@@ -13,4 +13,3 @@
 	</p>
 </article>
 
-## Posts
