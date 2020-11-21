@@ -1,9 +1,3 @@
----
-layout: default
-tagline: Master student & Software Engineer
-index: true
----
-
 <article>
 	<p>
 		<!--<a href="https://jon.tsp.io/share/me.jpg" id="avatar">
