@@ -420,5 +420,9 @@ for (int st = 0; st < n; ++st) {
 
 cout << (is_bipartite ? "YES" : "NO") << endl;
 ```
+二部图的可能应用有很多：
 
+https://zwj-coder.github.io/2020/11/21/codeforce1296.html
+
+https://zwj-coder.github.io/2020/11/21/codeforce1144.html
 
