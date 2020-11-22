@@ -298,7 +298,7 @@ Dag是一类特殊的图，对dag进行拓扑排序后得到的图，任何边(u
 
 所以对于任何一条最短路径$(v_0,v_1),(v_1,v_2),\dots,(v_{k-1},v_k)$, 如果我们按照拓扑排序的顺序对边进行松弛，那么最终的效果一定相同。因为对这个顺序中的任意边$(v_i, v_j)$， $v_i$一定在拓扑排序中出现在$v_j$的前面
 
-![image-20201122110540075](C:\Users\zhangwenjum\AppData\Roaming\Typora\typora-user-images\image-20201122110540075.png)
+![image-20201122110540075](/images/image-20201122110540075.png)
 
 ### Dijkstra算法
 
