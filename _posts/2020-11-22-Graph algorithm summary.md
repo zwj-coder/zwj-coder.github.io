@@ -379,3 +379,46 @@ $d^k_{ij}=min(d^{k-1}_{ij}, d^{k-1}_{ik}+d^{k-1}_{kj})$
 ![image-20201122112241641](/images/image-20201122112241641.png)
 
 当k等于n是，得到的最短路径p就是所用中间节点在$\{1,2,\dots,n\}$的路径。就是一个全局的最短路径。
+
+## 二部图
+
+二部图就是可以将图的节点分为两个集合，且图中的每条边的一个顶点属于一个集合，另一个顶点属于另一个集合。
+
+如果一个图可以用两种颜色染色，且一条边的两个顶点不能染同一种颜色。那么这样的一个图就是二部图
+
+A bipartite graph is a graph whose vertices can be divided into two disjoint sets so that every edge connects two vertices from different sets (i.e. there are no edges which connect vertices from the same set). These sets are usually called sides.
+
+一个可能的实现是利用bfs。
+
+首先从所有未染色的点中选择任意一个点，染成0色，然后访问跟该节点相连的所有节点，如果访问的节点没有染色，就染一个与源节点不同的颜色，如果访问的节点跟源节点颜色相同，那么就不能构成二部图，如果访问的节点跟源节点颜色不同，略过。
+
+```cpp
+int n;
+vector<vector<int>> adj;
+
+vector<int> side(n, -1);
+bool is_bipartite = true;
+queue<int> q;
+for (int st = 0; st < n; ++st) {
+    if (side[st] == -1) {
+        q.push(st);
+        side[st] = 0;
+        while (!q.empty()) {
+            int v = q.front();
+            q.pop();
+            for (int u : adj[v]) {
+                if (side[u] == -1) {
+                    side[u] = side[v] ^ 1;
+                    q.push(u);
+                } else {
+                    is_bipartite &= side[u] != side[v];
+                }
+            }
+        }
+    }
+}
+
+cout << (is_bipartite ? "YES" : "NO") << endl;
+```
+
+
