@@ -4,9 +4,9 @@
 
 邻接表和邻接矩阵
 
-![image-20201122095642906](C:\Users\zhangwenjum\AppData\Roaming\Typora\typora-user-images\image-20201122095642906.png)
+![image-20201122095642906](/images/image-20201122095642906.png)
 
-![image-20201122095722777](C:\Users\zhangwenjum\AppData\Roaming\Typora\typora-user-images\image-20201122095722777.png)
+![image-20201122095722777](/images/image-20201122095722777.png)
 
 邻接表的空间复杂度: $O(V+E)$
 
@@ -16,7 +16,7 @@
 
 ## BFS
 
-![image-20201122100201155](C:\Users\zhangwenjum\AppData\Roaming\Typora\typora-user-images\image-20201122100201155.png)
+![image-20201122100201155](/images/image-20201122100201155.png)
 
 BFS explore graph level by level from s
 
@@ -89,7 +89,7 @@ $u.f$表示u节点的finish时间戳
 1. 如果$[u.d,u.f]$和$[v.d,v.f]$不重合，那么$u$和$v$互不为子关系。
 2. 如果$[u.d,u.f]$完全包括在$[v.d,v.f]$中，那么u是v的子
 
-![image-20201122101047432](C:\Users\zhangwenjum\AppData\Roaming\Typora\typora-user-images\image-20201122101047432.png)
+![image-20201122101047432](/images/image-20201122101047432.png)
 
 ### Classification of edges
 
@@ -227,7 +227,7 @@ def MST-PRIM(G, w, r):
 
 一条最重要的性质
 
-![graph核心](C:\Users\zhangwenjum\Desktop\graph核心.PNG)
+![graph核心](/images/graph核心.PNG)
 
 最重要的操作：松弛
 
@@ -244,7 +244,7 @@ def Relax(u, v, w):
 
 对图中的所有边优化|V|-1次，因为形成的最短路径一定没有环，因为如果有正环，去掉正环可以得到一个更短的路径，如果有负环就无解。所以构成的Path Tree最多含有|V|-1条表，如果一次松弛所有的边，然后这样松弛|V|-1一次，最终的效果一定和按照$(v_0,v_1),(v_1,v_2),\dots,(v_{k-1},v_k)$效果相同
 
-![image-20201122105854636](C:\Users\zhangwenjum\AppData\Roaming\Typora\typora-user-images\image-20201122105854636.png)
+![image-20201122105854636](/images/image-20201122105854636.png)
 
 ```cpp
 const int inf = 1e8;
@@ -304,7 +304,7 @@ Dag是一类特殊的图，对dag进行拓扑排序后得到的图，任何边(u
 
 算法的核心在于维护两个集合A和B，A集合为以及形成最短路径树的集合，B集合为还没有形成最短路径树的集合，每次选一条A到B的最小cross edge，并进行松弛操作
 
-![image-20201122110556581](C:\Users\zhangwenjum\AppData\Roaming\Typora\typora-user-images\image-20201122110556581.png)
+![image-20201122110556581](/images/image-20201122110556581.png)
 
 ```cpp
 void dijkstra(int s, std::vector<std::vector<std::pair<int, int>>> &adj, std::vector<int> &d, std::vector<int> &p) {
@@ -376,6 +376,6 @@ $d^k_{ij}=min(d^{k-1}_{ij}, d^{k-1}_{ik}+d^{k-1}_{kj})$
 
 所以算法就是：
 
-![image-20201122112241641](C:\Users\zhangwenjum\AppData\Roaming\Typora\typora-user-images\image-20201122112241641.png)
+![image-20201122112241641](/images/image-20201122112241641.png)
 
 当k等于n是，得到的最短路径p就是所用中间节点在$\{1,2,\dots,n\}$的路径。就是一个全局的最短路径。
