@@ -1,0 +1,345 @@
+# 0-1 BFS
+
+0-1 BFS是用来寻找一个只有0和1权值的图的最小路径的算法
+
+这个算法的灵感是来自于Dijkstra算法，但是由于这里的权值只能是0或1，所以在Dijkstra算法中的queue中，任意两个点到源点s的距离的差最大是1。
+
+why?
+
+在Dijkstra算法中，当`d[u] + w < d[v]`时，我们才执行松弛操作，并将`v`加入到queue中，由于这里的`w==0||w==1`，所以只有当`d[u] < d[v] || du[u] + 1 < d[v]`，才能加到queue中。假设queue中存在一个点`u`满足`d[u]-d[v]>1`，那么这个`u`一定是通过另外一个点`t`加入进queue的，并且满足`d[t]>= d[u]-1>d[v]`。但是这是不可能的，因为Dijkstra算法按照距离的升序进行迭代。
+
+所以Dijkstra算法的queue中的顺序是这样的
+
+![image-20201123124703313](\images\image-20201123124703313.png)
+
+因为这个顺序，所以我们不再需要使用priority_queue结构，直接使用queue结果，如果权值为0，那么加入到queue开头，如果权值为1，加入到queue的结尾。
+
+```cpp
+vector<int> d(n, INF);
+d[s] = 0;
+deque<int> q;
+q.push_front(s);
+while (!q.empty()) {
+    int v = q.front();
+    q.pop_front();
+    for (auto edge : adj[v]) {
+        int u = edge.first;
+        int w = edge.second;
+        if (d[v] + w < d[u]) {
+            d[u] = d[v] + w;
+            if (w == 1)
+                q.push_back(u);
+            else
+                q.push_front(u);
+        }
+    }
+}
+```
+
+例题：
+
+https://www.codechef.com/problems/REVERSE
+
+REVERSE: Chef and Reversing
+
+Sometimes mysteries happen. Chef found a directed graph with **N** vertices and **M** edges in his kitchen!
+
+The evening was boring and chef has nothing else to do, so to entertain himself, Chef thought about a question "What is the minimum number of edges he needs to reverse in order to have at least one path from vertex **1** to vertex **N**, where the vertices are numbered from **1** to **N**.
+
+### Input
+
+Each test file contains only one test case.
+
+The first line of the input contains two space separated integers **N** and **M**, denoting the number of vertices and the number of edges in the graph respectively. The **i**th line of the next **M** lines contains two space separated integers **Xi** and **Yi**, denoting that the **i**th edge connects vertices from **Xi** to **Yi**.
+
+### Output
+
+In a single line, print the minimum number of edges we need to revert. If there is no way of having at least one path from **1** to **N**, print **-1**.
+
+### Constraints
+
+- **1 ≤ N, M ≤ 100000 = 105**
+- **1 ≤ Xi, Yi ≤ N**
+- There can be multiple edges connecting the same pair of vertices, There can be self loops too i.e. **Xi = Yi**
+
+题目的大意是：给定一个N个点M条边的有向图。问至少对多少条边进行反向才能至少有一条1到N点的路径呢？
+
+思考：可以对这个问题这样建模，由于我们需要的是计算需要反向的边数，所以不需要反向的边，它的价值为0，需要反向的边价值为1.我们在加入边时，不但加入一条权值为0的正向边，还加入一条权值为1的反向边，那么问题就成了，找到一个1到N的最短路径，这就简化成了0-1 BFS问题了
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+void solve() {
+    int n, m;
+    cin >> n >> m;
+    vector<vector<pair<int,int>>> adj(n+1, vector<pair<int,int>>());
+    for (int k = 0; k < m; k++) {
+        int u, v;
+        cin >> u >> v;
+        adj[u].push_back({v, 0});
+        adj[v].push_back({u, 1});
+    }
+    // dijkstra
+    const int inf = 1e8;
+    vector<int> d(n+1, inf);
+    deque<int> q;
+    d[1] = 0;
+    q.push_front(1);
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop_front();
+        for (auto& edge: adj[u]) {
+            int v, w;
+            tie(v, w) = edge;
+            if (d[u] + w < d[v]) {
+                d[v] = d[u] + w;
+                if (w == 0) {
+                    q.push_front(v);
+                } 
+                else {
+                    q.push_back(v);
+                }
+            }
+        }
+    }
+    if (d[n] == inf) {
+        cout << "-1\n";
+    } else 
+        cout << d[n] << endl;
+}
+
+int main() {
+    solve();
+}
+```
+
+## Codeforces B. Labyrinth
+
+time limit per test
+
+2 seconds
+
+memory limit per test
+
+512 megabytes
+
+input
+
+standard input
+
+output
+
+standard output
+
+You are playing some computer game. One of its levels puts you in a maze consisting of *n* lines, each of which contains *m* cells. Each cell either is free or is occupied by an obstacle. The starting cell is in the row *r* and column *c*. In one step you can move one square up, left, down or right, if the target cell is not occupied by an obstacle. You can't move beyond the boundaries of the labyrinth.
+
+Unfortunately, your keyboard is about to break, so you can move left no more than *x* times and move right no more than *y* times. There are no restrictions on the number of moves up and down since the keys used to move up and down are in perfect condition.
+
+Now you would like to determine for each cell whether there exists a sequence of moves that will put you from the starting cell to this particular one. How many cells of the board have this property?
+
+Input
+
+The first line contains two integers *n*, *m* (1 ≤ *n*, *m* ≤ 2000) — the number of rows and the number columns in the labyrinth respectively.
+
+The second line contains two integers *r*, *c* (1 ≤ *r* ≤ *n*, 1 ≤ *c* ≤ *m*) — index of the row and index of the column that define the starting cell.
+
+The third line contains two integers *x*, *y* (0 ≤ *x*, *y* ≤ 109) — the maximum allowed number of movements to the left and to the right respectively.
+
+The next *n* lines describe the labyrinth. Each of them has length of *m* and consists only of symbols '.' and '*'. The *j*-th character of the *i*-th line corresponds to the cell of labyrinth at row *i* and column *j*. Symbol '.' denotes the free cell, while symbol '*' denotes the cell with an obstacle.
+
+It is guaranteed, that the starting cell contains no obstacles.
+
+Output
+
+Print exactly one integer — the number of cells in the labyrinth, which are reachable from starting cell, including the starting cell itself.
+
+Examples
+
+input
+
+Copy
+
+```
+4 5
+3 2
+1 2
+.....
+.***.
+...**
+*....
+```
+
+output
+
+Copy
+
+```
+10
+```
+
+input
+
+Copy
+
+```
+4 4
+2 2
+0 1
+....
+..*.
+....
+....
+```
+
+output
+
+Copy
+
+```
+7
+```
+
+Note
+
+Cells, reachable in the corresponding example, are marked with '+'.
+
+First example:
+
+```
++++..
++***.
++++**
+*+++.
+```
+
+Second example:
+
+```
+.++.
+.+*.
+.++.
+.++.
+```
+
+这个题目的大意是，给定一个矩阵，`.`代表空位，`*`代表障碍，从一个起点`(r,c)`出发，问最后能够到达所有点的数目，这里可以移动的方向是上下左右，但是对左右一定设定了限制，最多只能左移`x`次和右移动`y`次。
+
+这里要做一个简单的分析。假设起点为$(i_0, j_0)$， 某个可达的点为$(i_1, j_i)$。那么假设R为右移次数，L为左移次数，可以得到这样一个关系$R-L=j_1-j_0$
+
+注意右边的这个值是一个常数，只和起点和终点的位置有关。
+
+那么对于任何一个点，如果我们求的了左移的最小值，由于右边是一个常数，那么右移的次数也是一个最小值。所以在使用最短路径算法的过程中我们只用求左右一边的最小移动次数。
+
+这里我们只求对每个点左移的最小次数。对这个问题，上下移动不受限制，开销是0，左移开销为1，右移不考虑，也为0.
+
+所以也是一个0-1bfs问题：
+
+求到每一个点的最小左移距离，最终判断如下条件
+
+```cpp
+int res = 0;
+    for (int i = 0; i < n * m; i++) {
+        if (d[i] <= x) {
+            int k = i % m;
+            if (k - c <= y - d[i]) {
+                res++;
+            }
+        }
+    }
+```
+
+最终程序复杂度$O(mn)$
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+int transform(int n, int m, int x, int y)
+{
+    return x * m + y;
+}
+
+void solve()
+{
+    int n, m;
+    cin >> n >> m;
+    int r, c;
+    cin >> r >> c;
+    r -= 1;
+    c -= 1;
+    int x, y;
+    cin >> x >> y;
+    vector<vector<char>> grid(n, vector<char>(m));
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < m; j++)
+        {
+            cin >> grid[i][j];
+        }
+    }
+    const int inf = 1e9+5;
+    vector<vector<pair<int, int>>> adj(n*m);
+    vector<int> d(n*m, inf);
+    d[transform(n, m, r, c)] = 0;
+    int dx[4] = {-1, 1, 0, 0};
+    int dy[4] = {0, 0, -1, 1};
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < m; j++)
+        {
+            if (grid[i][j] == '.')
+            {
+                for (int k = 0; k < 4; k++)
+                {
+                    int ni = i + dx[k];
+                    int nj = j + dy[k];
+                    if (ni >= 0 && ni < n && nj >= 0 && nj < m && grid[ni][nj] == '.')
+                    {
+                        if (k == 2) {
+                            adj[transform(n, m, i, j)].push_back({transform(n, m, ni, nj), 1});
+                        } else {
+                            adj[transform(n, m, i, j)].push_back({transform(n, m, ni, nj), 0});
+                        }
+                    }
+                }
+            }
+        }
+    }
+    int s = transform(n, m, r, c);
+    deque<int> lq;
+    lq.push_front(s);
+    while (!lq.empty()) {
+        int u = lq.front();
+        lq.pop_front();
+        for (auto& p: adj[u]) {
+            int v, w;
+            tie(v, w) = p;
+            if (d[u] + w < d[v]) {
+                d[v] = d[u] + w;
+                if (w == 0) {
+                    lq.push_front(v);
+                } else if (w == 1) {
+                    lq.push_back(v);
+                }
+            }
+        }
+    }
+
+    int res = 0;
+    for (int i = 0; i < n * m; i++) {
+        if (d[i] <= x) {
+            int k = i % m;
+            if (k - c <= y - d[i]) {
+                res++;
+            }
+        }
+    }
+    cout << res << '\n';
+}
+
+int main()
+{
+    solve();
+}
+```
+
